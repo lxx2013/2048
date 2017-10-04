@@ -11,19 +11,21 @@ function newgame() {
 	generateOneNumber();
 	generateOneNumber();
 }
-function GetBack(){
-	if(boardBackList.length == 0){
+
+function GetBack() {
+	if (boardBackList.length == 0) {
 		return;
 	}
 	var back = boardBackList.pop();
-	for(var i=0;i<4;i++){
-		for(var j=0;j<4;j++){
+	for (var i = 0; i < 4; i++) {
+		for (var j = 0; j < 4; j++) {
 			board[i][j] = back[i][j];
 		}
 	}
 	updateBoardView();
 }
 var score = 0;
+
 function init() {
 	for (var i = 0; i < 4; i++) {
 		for (var j = 0; j < 4; j++) {
@@ -41,40 +43,33 @@ function init() {
 		}
 	}
 	score = 0;
+	updateScore(0);
 	updateBoardView();
 }
+
 function getposTop(i, j) {
-	return i * (cellSideLength+cellSpace) + cellSpace;
+	return i * (cellSideLength + cellSpace) + cellSpace;
 }
+
 function getposLeft(i, j) {
-	return j * (cellSideLength+cellSpace) + cellSpace;
+	return j * (cellSideLength + cellSpace) + cellSpace;
 }
+
 function updateBoardView() {
-	AddCount = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+	AddCount = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
 	$(".number-cell").remove();
 	for (var i = 0; i < 4; i++) {
 		for (var j = 0; j < 4; j++) {
-			$("#grid-container").append('<div class="number-cell" id="number-cell-' + i + '-' + j + '">'+board[i][j]+'</div>');
-			var theNumberCell = $('#number-cell-' + i + '-' + j);
-
 			if (board[i][j] == 0) {
-				theNumberCell.css({
-					width: 0,
-					height: 0,
-					top:getposTop(i,j),
-					left:getposLeft(i,j)
-				});
+
 			} else {
+				var theNumberCell = $('<div class="number-cell number-cell-' + i + '-' + j + '">' + board[i][j] + '</div>');
 				theNumberCell.css({
-					width: cellSideLength,
-					height: cellSideLength,
-					fontSize:board[i][j]>=1024?cellSideLength*0.4:cellSideLength*0.6,
-					top: getposTop(i, j),
-					left: getposLeft(i, j),
-					backgroundColor: getNumberBackgroundColor(board[i][j]),
-					color:getNumColor(board[i][j]),
-					lineHeight:cellSideLength+'px'
+					fontSize: board[i][j] >= 1024 ? cellSideLength * 0.4 : cellSideLength * 0.6,
+					lineHeight: cellSideLength + 'px'
 				})
+				theNumberCell.addClass('color'+board[i][j]);
+				$("#grid-container").append(theNumberCell);
 			}
 		}
 	}
@@ -82,201 +77,111 @@ function updateBoardView() {
 
 var boardBack = new Array();
 var boardBackList = new Array();
-$(document).keydown(function(event){
-	if([37,38,39,40].indexOf(event.keyCode)!=-1 ){
+$(document).keydown(function (event) {
+	if ([37, 38, 39, 40].indexOf(event.keyCode) != -1) {
 		boardBack = new Array();
-		for(var i in board){
+		for (var i in board) {
 			boardBack[i] = board[i].slice(0);
 		}
-	}
-	event.preventDefault();
-	switch(event.keyCode){
-		case 37: //left
-			if(moveLeft()){
-				boardBackList.push(boardBack);
-				generateOneNumber();
-				isGameOver();
-			}
-			break;
-		case 38: //up
-			if(moveUp()){
-				boardBackList.push(boardBack);
-				generateOneNumber();
-				isGameOver();
-			}
-			break;
-		case 39: //right
-			if(moveRight()){
-				boardBackList.push(boardBack);
-				generateOneNumber();
-				isGameOver();
-			}
-			break;
-		case 40: //down
-			if(moveDown()){
-				boardBackList.push(boardBack);
-				generateOneNumber();
-				isGameOver();
-			}
-			break;
-		default:
-			break;
+		event.preventDefault();
+		AddCount = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+		switch (event.keyCode) {
+			case 37: //left
+				if (moveLeft()) {
+					boardBackList.push(boardBack);
+					generateOneNumber();
+					isGameOver();
+				}
+				break;
+			case 38: //up
+				if (moveUp()) {
+					boardBackList.push(boardBack);
+					generateOneNumber();
+					isGameOver();
+				}
+				break;
+			case 39: //right
+				if (moveRight()) {
+					boardBackList.push(boardBack);
+					generateOneNumber();
+					isGameOver();
+				}
+				break;
+			case 40: //down
+				if (moveDown()) {
+					boardBackList.push(boardBack);
+					generateOneNumber();
+					isGameOver();
+				}
+				break;
+			default:
+				break;
+		}
 	}
 });
-var t1,t2;
-$(document).bind('touchstart',function(event){
+var t1, t2;
+$(document).bind('touchstart', function (event) {
 	t1 = event.originalEvent.touches[0];
 });
 var isTouchMoving = 0;
-$(document).bind('touchmove',function(event){
+$(document).bind('touchmove', function (event) {
 	event.preventDefault();
 	t2 = event.originalEvent.changedTouches[0];
-	if(Math.abs(t1.pageX-t2.pageX)<0.2*documentWidth&&Math.abs(t1.pageY-t2.pageY)<0.2*documentWidth){
+	if (Math.abs(t1.pageX - t2.pageX) < 0.2 * documentWidth && Math.abs(t1.pageY - t2.pageY) < 0.2 * documentWidth) {
 		return;
 	}
-	if(isTouchMoving == 1){return;}
+	if (isTouchMoving == 1) {
+		return;
+	}
 	isTouchMoving = 1;
-	if(Math.abs(t1.pageX-t2.pageX) > Math.abs(t1.pageY-t2.pageY)){
+	if (Math.abs(t1.pageX - t2.pageX) > Math.abs(t1.pageY - t2.pageY)) {
 		//x
-		if(t1.pageX<t2.pageX){
+		if (t1.pageX < t2.pageX) {
 			var e = $.Event('keydown');
 			e.keyCode = 39;
 			$(document).trigger(e);
-		}
-		else{
+		} else {
 			var e = $.Event('keydown');
 			e.keyCode = 37;
 			$(document).trigger(e);
 		}
-	}
-	else{
+	} else {
 		//y
-		if(t1.pageY<t2.pageY){
+		if (t1.pageY < t2.pageY) {
 			var e = $.Event('keydown');
 			e.keyCode = 40;
 			$(document).trigger(e);
-		}
-		else{
+		} else {
 			var e = $.Event('keydown');
 			e.keyCode = 38;
 			$(document).trigger(e);
 		}
 	}
 });
-$(document).bind('touchend',function(event){
+$(document).bind('touchend', function (event) {
 	isTouchMoving = 0;
 });
-function moveLeft(){
-	if(!canMoveLeft())
+
+function moveLeft() {
+	if (!canMoveLeft())
 		return false;
-	for(var i=0;i<4;i++){
-		for(var j=1;j<4;j++){
-			if(board[i][j] != 0){
-				for(var k=0;k<j;k++){
-					if(board[i][k] == 0){
-						if(noObstacle(i,k,i,j)){
+	for (var i = 0; i < 4; i++) {
+		for (var j = 1; j < 4; j++) {
+			if (board[i][j] != 0) {
+				for (var k = 0; k < j; k++) {
+					if (board[i][k] == 0) {
+						if (noObstacle(i, k, i, j)) {
 							board[i][k] = board[i][j];
 							board[i][j] = 0;
-							showMoveAnimation(i,k,i,j);
+							showMoveAnimation(i, k, i, j);
 							break;
 						}
-					}
-					else if(board[i][k] == board[i][j]){
-						if(noObstacle(i,k,i,j)){
-							board[i][k] = board[i][j]*2;
+					} else if (board[i][k] == board[i][j]) {
+						if (noObstacle(i, k, i, j)) {
+							board[i][k] = board[i][j] * 2;
 							updateScore(board[i][j]);
 							board[i][j] = 0;
-							showMoveAnimation(i,k,i,j);
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	return true;
-}
-function moveUp(){
-	if(!canMoveUp())
-		return false;
-	for(var i=1;i<4;i++){
-		for(var j=0;j<4;j++){
-			if(board[i][j] != 0){
-				for(var k=0;k<i;k++){
-					if(board[k][j] == 0){
-						if(noObstacle(k,j,i,j)){
-							board[k][j] = board[i][j];
-							board[i][j] = 0;
-							showMoveAnimation(k,j,i,j);
-							break;
-						}
-					}
-					else if(board[k][j] == board[i][j]){
-						if(noObstacle(k,j,i,j)){
-							updateScore(board[i][j]);
-							board[k][j] = board[i][j]*2;
-							board[i][j] = 0;
-							showMoveAnimation(k,j,i,j);
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	return true;
-}
-function moveRight(){
-	if(!canMoveRight())
-		return false;
-	for(var i=0;i<4;i++){
-		for(var j=2;j>=0;j--){
-			if(board[i][j] != 0){
-				for(var k=3;k>j;k--){
-					if(board[i][k] == 0){
-						if(noObstacle(i,k,i,j)){
-							board[i][k] = board[i][j];
-							board[i][j] = 0;
-							showMoveAnimation(i,k,i,j);
-							break;
-						}
-					}
-					else if(board[i][k] == board[i][j]){
-						if(noObstacle(i,k,i,j)){
-							updateScore(board[i][j]);
-							board[i][k] = board[i][j]*2;
-							board[i][j] = 0;
-							showMoveAnimation(i,k,i,j);
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	return true;
-}
-function moveDown(){
-	if(!canMoveDown())
-		return false;
-	for(var i=2;i>=0;i--){
-		for(var j=0;j<4;j++){
-			if(board[i][j] != 0){
-				for(var k=3;k>i;k--){
-					if(board[k][j] == 0){
-						if(noObstacle(k,j,i,j)){
-							board[k][j] = board[i][j];
-							board[i][j] = 0;
-							showMoveAnimation(k,j,i,j);
-							break;
-						}
-					}
-					else if(board[k][j] == board[i][j]){
-						if(noObstacle(k,j,i,j)){
-							updateScore(board[i][j]);
-							board[k][j] = board[i][j]*2;
-							board[i][j] = 0;
-							showMoveAnimation(k,j,i,j);
+							showMoveAnimation(i, k, i, j);
 							break;
 						}
 					}
@@ -287,23 +192,113 @@ function moveDown(){
 	return true;
 }
 
-function prepareMobile(){
-	if(documentWidth>500){
-		gridContainerWidth =500;
-		$('header').css('width','500px');
+function moveUp() {
+	if (!canMoveUp())
+		return false;
+	for (var i = 1; i < 4; i++) {
+		for (var j = 0; j < 4; j++) {
+			if (board[i][j] != 0) {
+				for (var k = 0; k < i; k++) {
+					if (board[k][j] == 0) {
+						if (noObstacle(k, j, i, j)) {
+							board[k][j] = board[i][j];
+							board[i][j] = 0;
+							showMoveAnimation(k, j, i, j);
+							break;
+						}
+					} else if (board[k][j] == board[i][j]) {
+						if (noObstacle(k, j, i, j)) {
+							updateScore(board[i][j]);
+							board[k][j] = board[i][j] * 2;
+							board[i][j] = 0;
+							showMoveAnimation(k, j, i, j);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+function moveRight() {
+	if (!canMoveRight())
+		return false;
+	for (var i = 0; i < 4; i++) {
+		for (var j = 2; j >= 0; j--) {
+			if (board[i][j] != 0) {
+				for (var k = 3; k > j; k--) {
+					if (board[i][k] == 0) {
+						if (noObstacle(i, k, i, j)) {
+							board[i][k] = board[i][j];
+							board[i][j] = 0;
+							showMoveAnimation(i, k, i, j);
+							break;
+						}
+					} else if (board[i][k] == board[i][j]) {
+						if (noObstacle(i, k, i, j)) {
+							updateScore(board[i][j]);
+							board[i][k] = board[i][j] * 2;
+							board[i][j] = 0;
+							showMoveAnimation(i, k, i, j);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+function moveDown() {
+	if (!canMoveDown())
+		return false;
+	for (var i = 2; i >= 0; i--) {
+		for (var j = 0; j < 4; j++) {
+			if (board[i][j] != 0) {
+				for (var k = 3; k > i; k--) {
+					if (board[k][j] == 0) {
+						if (noObstacle(k, j, i, j)) {
+							board[k][j] = board[i][j];
+							board[i][j] = 0;
+							showMoveAnimation(k, j, i, j);
+							break;
+						}
+					} else if (board[k][j] == board[i][j]) {
+						if (noObstacle(k, j, i, j)) {
+							updateScore(board[i][j]);
+							board[k][j] = board[i][j] * 2;
+							board[i][j] = 0;
+							showMoveAnimation(k, j, i, j);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+function prepareMobile() {
+	if (documentWidth > 500) {
+		gridContainerWidth = 500;
+		$('header').css('width', '500px');
 		cellSpace = 20;
 		cellSideLength = 100;
 	}
 	$('#grid-container').css({
-		width:gridContainerWidth-2*cellSpace,
-		height:gridContainerWidth-2*cellSpace,
-		padding:cellSpace,
-		borderRadius:0.02*cellSideLength
+		width: gridContainerWidth,
+		height: gridContainerWidth,
+		padding: 0,
+		borderRadius: 0.02 * cellSideLength
 	});
 	$('.grid-cell').css({
-		width:cellSideLength,
-		height:cellSideLength,
-		borderRadius:0.02*cellSideLength
+		width: cellSideLength,
+		height: cellSideLength,
+		borderRadius: 0.02 * cellSideLength
 	});
-	
+
 }

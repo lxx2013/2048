@@ -1,58 +1,45 @@
-var isAnimating = new Array();
-for(var i = 0;i<16;i++){
-	isAnimating[i] = 0;
-}
-const moveTimer = 200;
-function isMoving(){
-	for(var x=0;x<4;x++){
-		for(var y=0;y<4;y++){
-			if(isAnimating[x*4+y] == 1)
+function isMoving() {
+	for (var i = 0; i < 4; i++) {
+		for (var j = 0; j < 4; j++) {
+			if (moving[i][j] != 0) {
 				return true;
+			}
 		}
 	}
 	return false;
 }
-function showNumberWithAnimation(i,j,num){
-	if(isMoving()){
-		setTimeout(function(){
-			showNumberWithAnimation(i,j,num)
-		},moveTimer);
-		return;
-	}
-	//isAnimating[i*4+j] = 1;
-	var cell = $('#number-cell-'+i+'-'+j);
+
+function showNumberWithAnimation(i, j, num, flag) {
+	var cell = $('<div class="number-cell-' + i + '-' + j + ' color' + num + '">' + num + '</div>');
+	cell.addClass('number-cell ');
 	cell.css({
-		color:getNumColor(num),
-		backgroundColor:getNumberBackgroundColor(num),
-		width:cellSideLength,
-		height:cellSideLength,
-		lineHeight:cellSideLength+'px',
-		fontSize:cellSideLength*0.6,
-		opacity:0
-	})
-	board[i][j] = num;
-	cell.text(board[i][j]);
-	cell.animate({
-		opacity:1
-	},moveTimer,function(){
-		//isAnimating[i*4+j] = 0;
+		fontSize: num >= 1024 ? cellSideLength * 0.4 : cellSideLength * 0.6,
+		lineHeight: cellSideLength + 'px'
 	});
+	setTimeout(function () {
+		$('#grid-container').append(cell)
+	}, 198)
 }
 
-function showMoveAnimation(toi,toj,fromi,fromj){
-	if(isAnimating[fromi*4+fromj] == 1){
-		setTimeout(function(){
-			showMoveAnimation(toi,toj,fromi,fromj);
-		},moveTimer);
-		return;
+function showMoveAnimation(toi, toj, fromi, fromj) {
+	var oldClass = 'number-cell-' + fromi + '-' + fromj;
+	var newClass = 'number-cell-' + toi + '-' + toj;
+	var num = board[toi][toj];
+	$('.' + newClass).remove();
+	var text = $('.' + oldClass).text();
+	var old = $('.' + oldClass);
+	old.removeClass(oldClass);
+	old.addClass(newClass);
+	if (text != num) {
+		setTimeout(function () {
+			old.remove();
+			var merge = $('<div class="number-cell ' + newClass + ' color' + num + '">' + num + '</div>');
+			merge.css({
+				fontSize: num >= 1024 ? cellSideLength * 0.4 : cellSideLength * 0.6,
+				lineHeight: cellSideLength + 'px'
+			});
+			$('#grid-container').append(merge);
+		}, 198)
 	}
-	isAnimating[fromi*4+fromj] = 1;
-	var cell = $('#number-cell-'+fromi+'-'+fromj);
-	cell.animate({
-		top:getposTop(toi,toj),
-		left:getposLeft(toi,toj)
-	},moveTimer,function(){
-		isAnimating[fromi*4+fromj] = 0;
-		updateBoardView();
-	});
+
 }
